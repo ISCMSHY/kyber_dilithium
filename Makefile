@@ -25,5 +25,5 @@ DILI_HEADERS = $(DILI_DIR)/config.h $(DILI_DIR)/config.h $(DILI_DIR)/params.h $(
 DILI_HEADERSKECCAK = $(DILI_HEADERS) $(DILI_DIR)/fips202.h
 
 
-make: $(KYBER_SOURCESKECCAK) $(KYBER_HEADERSKECCAK) $(DILI_SOURCESKECCAK) $(DILI_HEADERSKECCAK) main.c $(KYBER_DIR)/randombytes.c ./AES/AES_func.c
-	$(CC) $(CFLAGS) -DKYBER_K=2 -DDILITHIUM_MODE=5 $(KYBER_SOURCESKECCAK) $(DILI_SOURCESKECCAK) $(KYBER_DIR)/randombytes.c ./AES/AES_func.c main.c -o main
+make: $(KYBER_SOURCESKECCAK) $(KYBER_HEADERSKECCAK) $(DILI_SOURCESKECCAK) $(DILI_HEADERSKECCAK) main.c $(KYBER_DIR)/randombytes.c ./AES/AES_func.c ./Kyber_Dilithium.h ./Kyber_Dilithium.c
+	$(CC) $(CFLAGS) -DKYBER_K=2 -DDILITHIUM_MODE=5 $(KYBER_SOURCESKECCAK) $(DILI_SOURCESKECCAK) $(KYBER_DIR)/randombytes.c ./AES/AES_func.c ./Kyber_Dilithium.c main.c -o main
