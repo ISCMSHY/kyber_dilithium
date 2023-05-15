@@ -5,6 +5,7 @@
 #include "./kyber/randombytes.h"
 #include "./dilithium/randombytes.h"
 #include "./dilithium/sign.h"
+#include "./AES/AES_func.h"
 
 #define MLEN 59
 
@@ -16,6 +17,16 @@ void print();
 
 int main(void)
 {
+    uint8_t plaintext[4][4] = {{0x32, 0x88, 0x31, 0xe0},
+                           {0x43, 0x5a, 0x31, 0x37},
+                           {0xf6, 0x30, 0x98, 0x07},
+                           {0xa8, 0x8d, 0xa2, 0x34}};
+
+    uint8_t cipher_key_256[4][8] = {{0x60, 0x15, 0x2b, 0x85, 0x1f, 0x3b, 0x2d, 0x09},
+                                    {0x3d, 0xca, 0x73, 0x7d, 0x35, 0x61, 0x98, 0x14},
+                                    {0xeb, 0x71, 0xae, 0x77, 0x2c, 0x08, 0x10, 0xdf},
+                                    {0x10, 0xbe, 0xf0, 0x81, 0x07, 0xd7, 0xa3, 0xf4}};
+    AES_256bit(plaintext, cipher_key_256);
     Kyber_KE();
     dilithium5();
 
@@ -62,7 +73,7 @@ int dilithium5(){
     int ret;
     size_t mlen, smlen;
     uint8_t b;
-    uint8_t m[MLEN + CRYPTO_BYTES_DILI] = {72,101,108,108,111,32,110,105,99,101,32,116,111,32,109,101,101,116,32,121,111,117,46,32,77,121,32,110,97,109,101,32,105,115,32,73,83,67,77,83,72,89,32,98,101,108,111,110,103,32,116,111,32,80,69,80,83,73,46};
+    uint8_t m[MLEN + CRYPTO_BYTES_DILI] = {72,101,108,108,111,32,110,105,99,101,32,116,111,32,109,101,101,116,32,121,111,117,46,32,77,121,32,110,97,109,101,32,105,115,32,73,83,67,77,83,72,89,32,98,101,108,111,110,103,32,116,111,32,75,77,85,110,105,118};
     uint8_t m2[MLEN + CRYPTO_BYTES_DILI];
     uint8_t sm[MLEN + CRYPTO_BYTES_DILI];
     uint8_t pk[CRYPTO_PUBLICKEYBYTES_DILI];

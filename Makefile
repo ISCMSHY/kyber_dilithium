@@ -1,5 +1,5 @@
-CC ?= /usr/bin/cc
-CFLAGS += -Wall -Wextra -Wpedantic -Wredundant-decls -Wshadow -Wvla -Wpointer-arith -O3 -fomit-frame-pointer
+CC = /usr/bin/gcc 
+CFLAGS += -Wall -Wextra -Wpedantic -Wredundant-decls -Wshadow -Wvla -Wpointer-arith -O3 -fomit-frame-pointer -Wno-vla
 
 # kyber
 KYBER_DIR = ./kyber
@@ -24,15 +24,6 @@ DILI_HEADERS = $(DILI_DIR)/config.h $(DILI_DIR)/config.h $(DILI_DIR)/params.h $(
 	$(DILI_DIR)/polyvec.h $(DILI_DIR)/poly.h $(DILI_DIR)/ntt.h $(DILI_DIR)/reduce.h $(DILI_DIR)/rounding.h $(DILI_DIR)/symmetric.h $(DILI_DIR)/randombytes.h
 DILI_HEADERSKECCAK = $(DILI_HEADERS) $(DILI_DIR)/fips202.h
 
-# SOURCES = $(DIR)/kex.c $(DIR)/kem.c $(DIR)/indcpa.c $(DIR)/polyvec.c $(DIR)/poly.c $(DIR)/ntt.c $(DIR)/cbd.c $(DIR)/reduce.c $(DIR)/verify.c \
-# 	$(DIR)/sign.c $(DIR)/packing.c $(DIR)/polyvec_dili.c $(DIR)/poly_dili.c $(DIR)/ntt_dili.c $(DIR)/reduce_dili.c $(DIR)/rounding.c
-# SOURCESKECCAK = $(SOURCES) $(DIR)/fips202.c $(DIR)/symmetric-shake.c $(DIR)/fips202_dili.c $(DIR)/symmetric-shake_dili.c
 
-# HEADERS = $(DIR)/params.h $(DIR)/kex.h $(DIR)/kem.h $(DIR)/indcpa.h $(DIR)/polyvec.h $(DIR)/poly.h $(DIR)/ntt.h $(DIR)/cbd.h $(DIR)/reduce.c $(DIR)/verify.h $(DIR)/symmetric.h \
-# 	$(DIR)/config.h $(DIR)/config.h $(DIR)/params_dili.h $(DIR)/api.h $(DIR)/sign.h $(DIR)/packing.h $(DIR)/polyvec_dili.h $(DIR)/poly_dili.h $(DIR)/ntt_dili.h $(DIR)/reduce_dili.h $(DIR)/rounding.h \
-# 	$(DIR)/symmetric_dili.h $(DIR)/randombytes_dili.h
-# HEADERSKECCAK = $(HEADERS) $(DIR)/fips202.h $(DIR)/fips202_dili.h
-
-
-make: $(KYBER_SOURCESKECCAK) $(KYBER_HEADERSKECCAK) $(DILI_SOURCESKECCAK) $(DILI_HEADERSKECCAK) main.c $(KYBER_DIR)/randombytes.c
-	$(CC) $(CFLAGS) -DKYBER_K=2 -DDILITHIUM_MODE=5 $(KYBER_SOURCESKECCAK) $(DILI_SOURCESKECCAK) $(KYBER_DIR)/randombytes.c main.c -o main
+make: $(KYBER_SOURCESKECCAK) $(KYBER_HEADERSKECCAK) $(DILI_SOURCESKECCAK) $(DILI_HEADERSKECCAK) main.c $(KYBER_DIR)/randombytes.c ./AES/AES_func.c
+	$(CC) $(CFLAGS) -DKYBER_K=2 -DDILITHIUM_MODE=5 $(KYBER_SOURCESKECCAK) $(DILI_SOURCESKECCAK) $(KYBER_DIR)/randombytes.c ./AES/AES_func.c main.c -o main
