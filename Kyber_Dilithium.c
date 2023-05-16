@@ -1,8 +1,23 @@
 #include "Kyber_Dilithium.h"
+#include "./kyber/symmetric.h"
 
 void print(uint8_t *sub, int lengths){
     for(int i = 0; i < lengths; i++)    printf("%02X", sub[i]);
     printf("\n");
+}
+
+void sum_buf(uint8_t *A, uint8_t *B, int A_cur_len, int B_len){
+    for(int i = 0; i < B_len; i++)  A[A_cur_len + i] = B[i];
+}
+
+void print_mess(uint8_t *arr, int len){
+    for(int i = 0; i < len; i++){
+        if(arr[i] == '\0'){
+            printf("\n");
+            return;
+        }
+        printf("%c", arr[i]);
+    }
 }
 
 int Kyber_KE()
@@ -36,7 +51,7 @@ int Kyber_KE()
 }
 
 int Kyber_KE_MITM_Attack(){
-    printf("\n------------------------------------ KYBER KE MITM Attack -------------------------------\n");
+    printf("\n\n\n\n------------------------------------ KYBER KE MITM Attack -------------------------------\n");
     uint8_t pk[CRYPTO_PUBLICKEYBYTES];
     uint8_t sk[CRYPTO_SECRETKEYBYTES];
     uint8_t ct[CRYPTO_CIPHERTEXTBYTES];
@@ -88,29 +103,82 @@ int Kyber_KE_MITM_Attack(){
     return 0;
 }
 
-// int kyber_AKE(){
-//     uint8_t pk_A_auth[CRYPTO_PUBLICKEYBYTES];
-//     uint8_t sk_A_auth[CRYPTO_SECRETKEYBYTES];
-//     uint8_t pk_B_auth[CRYPTO_PUBLICKEYBYTES];
-//     uint8_t sk_B_auth[CRYPTO_SECRETKEYBYTES];
-//     uint8_t pk[CRYPTO_SECRETKEYBYTES];
-//     uint8_t sk[CRYPTO_SECRETKEYBYTES];
-//     uint8_t K_2[2*KYBER_SYMBYTES];
-//     uint8_t ct[CRYPTO_CIPHERTEXTBYTES];
-//     uint8_t key_a[CRYPTO_BYTES];
-//     uint8_t key_b[CRYPTO_BYTES];
+int Kyber_AKE(uint8_t *cipher_key){
+    printf("\n\n\n\n--------------------------------- KYBER AKE ver. ----------------------------------\n");
+    uint8_t pk_A_auth[CRYPTO_PUBLICKEYBYTES];
+    uint8_t sk_A_auth[CRYPTO_SECRETKEYBYTES];
+    uint8_t pk_B_auth[CRYPTO_PUBLICKEYBYTES];
+    uint8_t sk_B_auth[CRYPTO_SECRETKEYBYTES];
+    uint8_t pk[CRYPTO_SECRETKEYBYTES];
+    uint8_t sk[CRYPTO_SECRETKEYBYTES];
+    uint8_t EK[3*KYBER_SYMBYTES];
+    uint8_t EK_p[3*KYBER_SYMBYTES];
+    uint8_t EK_T[1*KYBER_SYMBYTES];
+    uint8_t ct_1[CRYPTO_CIPHERTEXTBYTES];
+    uint8_t ct_2[CRYPTO_CIPHERTEXTBYTES];
+    uint8_t key_a[CRYPTO_BYTES];
+    uint8_t key_b[CRYPTO_BYTES];
 
-//     // Alice and Bob generates a auth public key, auth private key
-//     crypto_kem_keypair(pk_A_auth, sk_A_auth);
-//     crypto_kem_keypair(pk_B_auth, sk_B_auth);
+    // Alice and Bob generates a auth public key, auth private key
+    crypto_kem_keypair(pk_A_auth, sk_A_auth);
+    crypto_kem_keypair(pk_B_auth, sk_B_auth);
 
-//     // Alice Generates public key, private key.
-//     crypto_kem_keypair(pk, sk);
-//     // crypto_kem_enc(ct, key_b, pk_B_auth, K_2);
-// }
+    // Alice Generates public key, private key.
+    crypto_kem_keypair(pk, sk);
+
+    // Alice encapsulating Bob auth public key
+    crypto_kem_enc(ct_2, EK_T, pk_B_auth);
+    sum_buf(EK, EK_T, 2*KYBER_SYMBYTES, KYBER_SYMBYTES);
+    // and send ct_2, pk
+
+    // Bob receive ct, pk, and decapsulating ct_2 using Bob auth private key
+    crypto_kem_dec(EK_T, ct_2, sk_B_auth);
+    sum_buf(EK_p, EK_T, 2*KYBER_SYMBYTES, KYBER_SYMBYTES);
+    // And encapuslating Alice public key, and Alice auth public key
+    crypto_kem_enc(ct_1, EK_T, pk_A_auth);
+    sum_buf(EK_p, EK_T, KYBER_SYMBYTES, KYBER_SYMBYTES);
+    crypto_kem_enc(ct_2, EK_T, pk);
+    sum_buf(EK_p, EK_T, 0, KYBER_SYMBYTES);
+    // send ct_1, ct_2
+
+    // Alice receive ct_1, ct_2, and decapsulating ct_2 using Alice private key, ct_1 using Alice auth private key
+    crypto_kem_dec(EK_T, ct_2, sk);
+    sum_buf(EK, EK_T, 0, KYBER_SYMBYTES);
+    crypto_kem_dec(EK_T, ct_1, sk_A_auth);
+    sum_buf(EK, EK_T, KYBER_SYMBYTES, KYBER_SYMBYTES);
+
+    // Alice Bob generate share key
+    hash_h(key_a, EK, 3*KYBER_SYMBYTES);
+    hash_h(key_b, EK_p, 3*KYBER_SYMBYTES);
+    hash_h(cipher_key, EK, 3*KYBER_SYMBYTES);
+
+    printf("Alice Key : ");
+    print(key_a, CRYPTO_BYTES);
+    printf("Bob Key : ");
+    print(key_b, CRYPTO_BYTES);
+
+    return 0;
+}
+
+void AES_with_Kyber(){
+    printf("\n\n\nRun AES algorithm using Kyber Symmetric key\n\n");
+    printf("create key using Kyber\n");
+    uint8_t cipher_key_256[32];
+    Kyber_AKE(cipher_key_256);
+    
+    char plain[16];
+    printf("> input send message(max 16) : ");
+    if (fgets(plain, sizeof(plain), stdin) == NULL){
+        printf("input error");
+        return;
+    }
+
+    printf("Encrypt & Decrypt AES algorithm using Kyber symmetric key\n");
+    AES_256bit(plain, cipher_key_256);
+}
 
 int dilithium5(){
-    printf("\n---------------------------- DILITHIUM -----------------------\n");
+    printf("\n\n\n\n---------------------------- DILITHIUM -----------------------\n");
     size_t j;
     int ret;
     size_t mlen, smlen;
@@ -122,8 +190,7 @@ int dilithium5(){
     uint8_t sk[CRYPTO_SECRETKEYBYTES_DILI];
 
     // randombytes(m, MLEN)
-    printf("Message : ");
-    printf("%s\n", m);
+    printf("Message : %s\n", m);
 
     crypto_sign_keypair(pk, sk);
 
@@ -133,7 +200,7 @@ int dilithium5(){
     
     ret = crypto_sign_open(m2, &mlen, sm, smlen, pk);
     printf("Verification Message : ");
-    printf("%s\n", m2);
+    print_mess(m2, MLEN);
     
     if(ret) {
         fprintf(stderr, "Verification failed\n");

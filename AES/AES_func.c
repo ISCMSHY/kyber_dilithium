@@ -18,6 +18,33 @@ void print_stream(int row, int column, uint8_t (*input)[column]){
     printf("\n");
 }
 
+void print_text(int row, int column, uint8_t (*input)[column]){
+    for(int i = 0; i < row; i++){
+        for(int j = 0; j < column; j++){
+            if(input[j][i] == '\0'){
+                printf("\n");
+                return;
+            }
+            printf("%c", input[j][i]);
+        }
+    }
+    printf("\n");
+}
+
+void set_text(uint8_t Text[standard_row][standard_column], char *plaintext){
+    for(int i = 0; i < 4; i++){
+        for(int j = 0; j < 4; j++)
+            Text[j][i] = (int)plaintext[4*i + j];
+    }
+}
+
+void set_key(int col, uint8_t cipher_key[standard_row][col], uint8_t *key){
+    for(int i = 0; i < col; i++){
+        for(int j = 0; j < 4; j++)
+            cipher_key[j][i] = key[4*i + j];
+    }
+}
+
 void SubBytes_test(uint8_t (*input)[standard_column]){
     printf("--------- Origin block State ---------\n");
     print_block(standard_row, standard_column, input);
@@ -214,59 +241,71 @@ void seperate_round_key(int column, uint8_t (*output)[standard_row][standard_col
 
 /* ------------------------------- AES 128,192,256bit ------------------------------- */
 
-void AES_128bit(uint8_t Text[standard_row][standard_column], uint8_t cipher_key[standard_row][4]){
+void AES_128bit(char *plaintext, uint8_t key[standard_row * 4]){
     printf("\n----------------- AES 128bit ------------------------\n");
+    uint8_t Text[standard_row][standard_column];
+    uint8_t cipher_key[standard_row][4];
+    set_text(Text, plaintext);
+    set_key(4, cipher_key, key);
     uint8_t G_round_key[11][4][4] = {0};
     uint8_t round_key[11][4][4] = {0};
     Key_Scheduling(10, 4, cipher_key, G_round_key);
     seperate_round_key(4, round_key, G_round_key, 128);
 
-    printf("plain text\n");
+    printf("plain text : ");
     print_stream(standard_row, standard_column, Text);
     
     encrypt(Text, round_key, 10);
-    printf("\nencrypted text\n");
-    print_stream(standard_row, standard_column, Text);
+    printf("\nencrypted text : ");
+    print_text(standard_row, standard_column, Text);
     
     decrypt(Text, round_key, 10);
-    printf("\ndecrypted text\n");
-    print_stream(standard_row, standard_column, Text);
+    printf("\ndecrypted text : ");
+    print_text(standard_row, standard_column, Text);
 }
 
-void AES_192bit(uint8_t Text[standard_row][standard_column], uint8_t cipher_key[standard_row][6]){
+void AES_192bit(char *plaintext, uint8_t key[standard_row * 6]){
     printf("\n----------------- AES 192bit ------------------------\n");
+    uint8_t Text[standard_row][standard_column];
+    uint8_t cipher_key[standard_row][6];
+    set_text(Text, plaintext);
+    set_key(6, cipher_key, key);
     uint8_t G_round_key[9][4][6] = {0};
     uint8_t round_key[13][4][4] = {0};                      
     Key_Scheduling(8, 6, cipher_key, G_round_key);
     seperate_round_key(6, round_key, G_round_key, 192);
 
-    printf("plain text\n");
-    print_stream(standard_row, standard_column, Text);
+    printf("plain text : ");
+    print_text(standard_row, standard_column, Text);
 
     encrypt(Text, round_key, 12);
-    printf("\nencrypted text\n");
+    printf("\nencrypted text : ");
     print_stream(standard_row, standard_column, Text);
 
     decrypt(Text, round_key, 12);
-    printf("\ndecrypted text\n");
-    print_stream(standard_row, standard_column, Text);
+    printf("\ndecrypted text : ");
+    print_text(standard_row, standard_column, Text);
 }
 
-void AES_256bit(uint8_t Text[standard_row][standard_column], uint8_t cipher_key[standard_row][8]){
+void AES_256bit(char *plaintext, uint8_t key[standard_row * 8]){
     printf("\n----------------- AES 256bit ------------------------\n");
+    uint8_t Text[standard_row][standard_column];
+    uint8_t cipher_key[standard_row][8];
+    set_text(Text, plaintext);
+    set_key(8, cipher_key, key);
     uint8_t G_round_key[8][4][8] = {0};
     uint8_t round_key[16][4][4] = {0};
     Key_Scheduling(7, 8, cipher_key, G_round_key);
     seperate_round_key(8, round_key, G_round_key, 256);
 
-    printf("plain text\n");
-    print_stream(standard_row, standard_column, Text);
+    printf("plain text : ");
+    print_text(standard_row, standard_column, Text);
 
     encrypt(Text, round_key, 14);
-    printf("\nencrypted text\n");
+    printf("\nencrypted text : ");
     print_stream(standard_row, standard_column, Text);
 
     decrypt(Text, round_key, 14);
-    printf("\ndecrypted text\n");
-    print_stream(standard_row, standard_column, Text);
+    printf("\ndecrypted text : ");
+    print_text(standard_row, standard_column, Text);
 }

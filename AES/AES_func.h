@@ -7,9 +7,13 @@ extern const int standard_column;
 /* ------------------------------- Debugging or Testing Functions -------------------------------*/
 void print_block(int row, int column, uint8_t (*input)[column]);
 void print_stream(int row, int column, uint8_t (*input)[column]);
+void print_text(int row, int column, uint8_t (*input)[column]);
 void SubBytes_test(uint8_t (*input)[standard_column]);
 void Shift_Row_test(uint8_t (*input)[standard_column]);
 void Mix_columns_test(uint8_t (*input)[standard_column]);
+
+void set_text(uint8_t Text[standard_row][standard_column], char *plaintext);
+void set_key(int col, uint8_t cipher_key[standard_row][col], uint8_t *key);
 
 /* ------------------------------- SubBytes -------------------------------*/
 void SubBytes(uint8_t (*input)[standard_column], int type);
@@ -40,6 +44,6 @@ void decrypt(uint8_t (*ciphertext)[], uint8_t (*round_key)[standard_row][standar
 /* ------------------------------- AES 192bit round_key seperate --------------------- */
 void seperate_round_key(int column, uint8_t (*output)[standard_row][standard_column], uint8_t (*input)[standard_row][column], int bit);
 
-void AES_128bit(uint8_t Text[standard_row][standard_column], uint8_t cipher_key[standard_row][4]);
-void AES_192bit(uint8_t Text[standard_row][standard_column], uint8_t cipher_key[standard_row][6]);
-void AES_256bit(uint8_t Text[standard_row][standard_column], uint8_t cipher_key[standard_row][8]);
+void AES_128bit(char *plaintext, uint8_t key[standard_row * 4]);
+void AES_192bit(char *plaintext, uint8_t key[standard_row * 6]);
+void AES_256bit(char *plaintext, uint8_t key[standard_row * 8]);
